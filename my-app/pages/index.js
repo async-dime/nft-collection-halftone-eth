@@ -419,12 +419,12 @@ export default function Home() {
             Presale has started!!! If your address is whitelisted, Mint a
             Halftone-ETH 🚀 Whitelist yourself first
             <a
-              className={styles.footerText}
               href="https://halftone-ethereum-whitelist.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
+              style={{ textDecoration: 'none' }}
             >
-              <b> here</b>
+              <span className={styles.linkText}> here</span>
             </a>
           </div>
           <button onClick={presaleMint} className={styles.button}>

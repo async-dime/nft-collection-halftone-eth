@@ -86,6 +86,7 @@
 
 .header,
 .button,
+.linkText,
 .footerText,
 .mintedTokenIds,
 .progressBar,
@@ -107,6 +108,7 @@
   );
 }
 .header,
+.linkText,
 .footerText,
 .mintedTokenIds,
 .showCounter .countdown {
@@ -114,6 +116,11 @@
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
+
+.linkText {
+  font-weight: 700;
+}
+
 
 .showCounter {
   display: flex;
