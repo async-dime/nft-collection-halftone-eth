@@ -4,4 +4,4 @@ import contractArtifact from '../utils/HalftoneEth.json';
 
 export const abi = contractArtifact.abi;
 export const NFT_CONTRACT_ADDRESS =
-  '0x9Ab6aF7c38832C81132B11d25536f32b0B3Dfa29';
+  '0x5bc58CCf8052cfaB0Cad81633eD6f174EDAD104f';
