@@ -37,6 +37,7 @@
 .footer {
   display: flex;
   padding: 2rem 0;
+  flex-direction: column;
   border-top: 1px solid #eaeaea;
   justify-content: center;
   align-items: center;
@@ -45,7 +46,6 @@
 .image {
   width: 500px;
   height: 500px;
-  padding-left: 20%;
 }
 
 .header {
@@ -88,7 +88,8 @@
 .button,
 .footerText,
 .mintedTokenIds,
-.progressBar {
+.progressBar,
+.showCounter .countdown {
   background-image: linear-gradient(
     to right,
     #d38312 0%,
@@ -96,17 +97,63 @@
     #d38312 90%
   );
 }
+.showCounter .countdown.danger {
+  animation: 3s ease 0s infinite normal none running blinker;
+  background-image: linear-gradient(
+    to right,
+    #d38c12 0%,
+    #a83232 50%,
+    #d38c12 95%
+  );
+}
 .header,
 .footerText,
-.mintedTokenIds {
+.mintedTokenIds,
+.showCounter .countdown {
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
+.showCounter {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  font-weight: 700;
+  line-height: 1.75rem;
+  padding: 2rem 0;
+  text-decoration: none;
+}
+
+.showCounter .countdown {
+  line-height: 1.25rem;
+  padding: 0 0.75rem 0 0.75rem;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  font-family: 'Poller One', cursive;
+}
+
+.showCounter .countdown > p {
+  margin: 0;
+}
+
+.showCounter .countdown > span {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
 .twitterLogo {
   width: 25px;
   height: 25px;
+}
+
+@keyframes blinker {
+  50% {
+    opacity: 10%;
+  }
 }
 
 @media (max-width: 1000px) {

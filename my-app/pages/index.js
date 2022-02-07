@@ -6,6 +6,7 @@ import Toast from '../components/Toast';
 import { useEffect, useRef, useState } from 'react';
 import { Contract, providers, utils } from 'ethers';
 import { abi, NFT_CONTRACT_ADDRESS } from '../constants';
+import CountDownTimer from '../components/CountDownTimer';
 
 const BarOfProgress = new ProgressBar({
   size: 4,
@@ -22,6 +23,8 @@ export default function Home() {
   const [presaleStarted, setPresaleStarted] = useState(false);
   // presaleEnded keeps track of whether the presale has ended or nah
   const [presaleEnded, setPresaleEnded] = useState(false);
+  // timestamp of presale end
+  const [presaleEndedTimestamp, setPresaleEndedTimestamp] = useState(0);
   // loading is set true when we are waiting for the transaction to get mined
   const [loading, setLoading] = useState(false);
   // checks if the currently connected wallet is the owner of the contract
@@ -30,6 +33,12 @@ export default function Home() {
   const [tokenIdsMinted, setTokenIdsMinted] = useState('0');
   // create a reference to the Web3 modal that used for connecting to MetaMask which persists as long as page open
   const web3ModalRef = useRef();
+
+  // const THREE_DAYS_IN_MS = 3 * 24 * 60 * 60 * 1000;
+  // const customTime = 4 * 60 * 60 * 1000 + 10 * 60 * 1000;
+  // const NOW_IN_MS = new Date().getTime();
+  // const mockTimestamp = NOW_IN_MS + customTime;
+  // const mockTimestamp = NOW_IN_MS + THREE_DAYS_IN_MS;
 
   const TWITTER_HANDLE = 'p0tat0H8';
   const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
@@ -169,7 +178,7 @@ export default function Home() {
       const whitelistContract = new Contract(NFT_CONTRACT_ADDRESS, abi, signer);
       // call the startPresale from the contract
       const tx = await whitelistContract.startPresale();
-      BarOfProgress.start(5000);
+      BarOfProgress.start(15000);
       // set loading to true so we can show a loading status
       setLoading(true);
       // wait for the transaction to get mined
@@ -231,6 +240,7 @@ export default function Home() {
       const nftContract = new Contract(NFT_CONTRACT_ADDRESS, abi, provider);
       // call the presaleEnded from the contract
       const _presaleEnded = await nftContract.presaleEnded();
+      setPresaleEndedTimestamp(_presaleEnded * 1000);
       // _presaleEnded is a Big Number, so we are using the lt(less than function) instead of `<`
       // Date.now()/1000 returns the current time in seconds
       // We compare if the _presaleEnded timestamp is less than the current time
@@ -426,10 +436,17 @@ export default function Home() {
 
     // if presale started and has ended, public minting can start
     if (presaleStarted && presaleEnded) {
+      console.log('presaleEnded', presaleEnded);
+      console.log('presaleEndedTimestamp', presaleEndedTimestamp);
       return (
-        <button onClick={publicMint} className={styles.button}>
-          Public Mint 🪙
-        </button>
+        <div>
+          <div className={styles.description}>
+            Presale has ended, but you still can do public minting!
+          </div>
+          <button onClick={publicMint} className={styles.button}>
+            Public Mint 🪙
+          </button>
+        </div>
       );
     }
   };
@@ -441,6 +458,8 @@ export default function Home() {
         <meta name="description" content="Halftone-Eth-Dapp" />
         <link rel="icon" href="/halftone-ethx50.ico" />
       </Head>
+      {/* <CountDownTimer targetDate={mockTimestamp} /> */}
+      <CountDownTimer targetDate={presaleEndedTimestamp} />
       <div className={styles.main}>
         <Toast toastList={list} />
         <div>
@@ -463,20 +482,22 @@ export default function Home() {
       </div>
 
       <footer className={styles.footer}>
-        <img
-          alt="Twitter Logo"
-          className={styles.twitterLogo}
-          src="./twitter.svg"
-        />
-        {'  '}
-        <a
-          className={styles.footerText}
-          href={TWITTER_LINK}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <b>{`built by @${TWITTER_HANDLE}`}</b>
-        </a>
+        <div>
+          <img
+            alt="Twitter Logo"
+            className={styles.twitterLogo}
+            src="./twitter.svg"
+          />
+          {'  '}
+          <a
+            className={styles.footerText}
+            href={TWITTER_LINK}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <b>{`built by @${TWITTER_HANDLE}`}</b>
+          </a>
+        </div>
       </footer>
     </div>
   );

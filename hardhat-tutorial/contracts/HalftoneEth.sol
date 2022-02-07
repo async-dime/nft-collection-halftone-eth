@@ -57,9 +57,9 @@ contract HalftoneEth is ERC721Enumerable, Ownable {
      */
     function startPresale() public onlyOwner {
         presaleStarted = true;
-        // set presaleEnded time as current timestamp + 5 minutes
+        // set presaleEnded time as current timestamp + 7 days
         // Solidity has cool syntax for timestamps (seconds, minutes, hours, days, years)
-        presaleEnded = block.timestamp + 5 minutes;
+        presaleEnded = block.timestamp + 7 days;
     }
 
     /**

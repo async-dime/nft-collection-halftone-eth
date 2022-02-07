@@ -10,6 +10,6 @@ export default function handler(req, res) {
     name: 'Halftone ETH #' + tokenId,
     description:
       'Halftone ETH is a multi-variant halftone version of Ethereum icon',
-    image: image_url + tokenId + '.svg',
+    image: image_url + tokenId + '.png',
   });
 }
