@@ -414,7 +414,7 @@ export default function Home() {
               target="_blank"
               rel="noopener noreferrer"
             >
-              <b>here</b>
+              <b> here</b>
             </a>
           </div>
           <button onClick={presaleMint} className={styles.button}>
@@ -439,7 +439,7 @@ export default function Home() {
       <Head>
         <title>Halftone ETH</title>
         <meta name="description" content="Halftone-Eth-Dapp" />
-        <link rel="icon" href="/eth.ico" />
+        <link rel="icon" href="/halftone-ethx50.ico" />
       </Head>
       <div className={styles.main}>
         <Toast toastList={list} />
