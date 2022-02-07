@@ -420,7 +420,7 @@ export default function Home() {
             Halftone-ETH 🚀 Whitelist yourself first
             <a
               className={styles.footerText}
-              href="https://whitelist-dapp-pearl.vercel.app/"
+              href="halftone-ethereum-whitelist.vercel.app/"
               target="_blank"
               rel="noopener noreferrer"
             >
