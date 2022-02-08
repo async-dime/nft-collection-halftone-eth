@@ -158,7 +158,7 @@ export default function Home() {
     try {
       // get the provider from web3modal (metamask)
       // for the first-time user, it prompts user to connect their wallet
-      const provider = await getProviderOrSigner(true);
+      await getProviderOrSigner();
       setWalletConnected(true);
     } catch (err) {
       console.error(err);
