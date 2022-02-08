@@ -33,6 +33,7 @@ export default function Home() {
   const [tokenIdsMinted, setTokenIdsMinted] = useState('0');
   // create a reference to the Web3 modal that used for connecting to MetaMask which persists as long as page open
   const web3ModalRef = useRef();
+  // button disable
 
   // const THREE_DAYS_IN_MS = 3 * 24 * 60 * 60 * 1000;
   // const customTime = 4 * 60 * 60 * 1000 + 10 * 60 * 1000;
@@ -148,21 +149,6 @@ export default function Home() {
         'error',
         `Minting Halftone-ETH NFT unsuccessful: ${err.message}`
       );
-    }
-  };
-
-  /**
-   * connectWallet: Connect to the MetaMask wallet
-   */
-  const connectWallet = async () => {
-    try {
-      // get the provider from web3modal (metamask)
-      // for the first-time user, it prompts user to connect their wallet
-      await getProviderOrSigner();
-      setWalletConnected(true);
-    } catch (err) {
-      console.error(err);
-      showToast('error', err.message);
     }
   };
 
@@ -333,9 +319,86 @@ export default function Home() {
         const signer = web3Provider.getSigner();
         return signer;
       }
+      setWalletConnected(true);
       return web3Provider;
     } catch (err) {
       console.error(err);
+      showToast('error', 'Please install MetaMask!');
+    }
+  };
+
+  const checkIfWalletIsConnected = async () => {
+    const { ethereum } = window;
+    try {
+      if (!ethereum) {
+        showToast('error', 'Make sure you have MetaMask!');
+        return;
+      } else {
+        showToast('success', `We have the ethereum object: ${ethereum}`);
+
+        const accounts = await ethereum.request({ method: 'eth_accounts' }); // Check if we're authorized to access the user's wallet
+
+        if (accounts.length !== 0) {
+          const account = accounts[0];
+          showToast('success', `Found a wallet address: ${account}.`);
+
+          // if wallet isn't connected, create a new instance of Web3Modal and connect the MetaMask wallet
+          if (!walletConnected) {
+            // Assign the Web3Modal class to the reference object by setting it's `current` value
+            // The `current` value is persisted throughout as long as this page is open
+            web3ModalRef.current = new Web3Modal({
+              network: 'rinkeby',
+              providerOptions: {},
+              disableInjectedProvider: false,
+            });
+            connectWallet();
+
+            // check if presale has started and ended
+            const _presaleStarted = checkIfPresaleStarted();
+            if (_presaleStarted) {
+              checkIfPresaleEnded();
+            }
+
+            getTokenIdsMinted();
+
+            // set an interval which gets called every 5 seconds to check if presale has ended
+            const presaleEndedInterval = setInterval(async function () {
+              const _presaleStarted = await checkIfPresaleStarted();
+              if (_presaleStarted) {
+                const _presaleEnded = await checkIfPresaleEnded();
+                if (_presaleEnded) {
+                  clearInterval(presaleEndedInterval);
+                }
+              }
+            }, 5000);
+          }
+        } else {
+          showToast('error', 'Please connect your MetaMask wallet.');
+          return;
+        }
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  /**
+   * connectWallet: Connect to the MetaMask wallet
+   */
+  const connectWallet = async () => {
+    const { ethereum } = window;
+    try {
+      if (ethereum) {
+        // get the provider from web3modal (metamask)
+        // for the first-time user, it prompts user to connect their wallet
+        await getProviderOrSigner();
+      } else {
+        showToast('error', 'Please install MetaMask!');
+        return;
+      }
+    } catch (err) {
+      console.error(err);
+      showToast('error', err.message);
     }
   };
 
@@ -345,36 +408,7 @@ export default function Home() {
    * In this case, whenever the value of `walletConnected` changes - this effect will be called
    */
   useEffect(() => {
-    // if wallet isn't connected, create a new instance of Web3Modal and connect the MetaMask wallet
-    if (!walletConnected) {
-      // Assign the Web3Modal class to the reference object by setting it's `current` value
-      // The `current` value is persisted throughout as long as this page is open
-      web3ModalRef.current = new Web3Modal({
-        network: 'rinkeby',
-        providerOptions: {},
-        disableInjectedProvider: false,
-      });
-      connectWallet();
-
-      // check if presale has started and ended
-      const _presaleStarted = checkIfPresaleStarted();
-      if (_presaleStarted) {
-        checkIfPresaleEnded();
-      }
-
-      getTokenIdsMinted();
-
-      // set an interval which gets called every 5 seconds to check if presale has ended
-      const presaleEndedInterval = setInterval(async function () {
-        const _presaleStarted = await checkIfPresaleStarted();
-        if (_presaleStarted) {
-          const _presaleEnded = await checkIfPresaleEnded();
-          if (_presaleEnded) {
-            clearInterval(presaleEndedInterval);
-          }
-        }
-      }, 5000);
-    }
+    checkIfWalletIsConnected();
   }, [walletConnected]);
 
   /**
@@ -382,71 +416,69 @@ export default function Home() {
    */
   const renderButton = () => {
     // if wallet isn't connected, return a button which allows them to connect their wallet
-    if (!walletConnected) {
+    if (walletConnected) {
+      // if we are currently waiting for something, return a loading button
+      if (loading) return <button className={styles.button}>Loading...</button>;
+
+      // if connected user is NOT the owner, and presale hasn't started yet, display a presale status
+      if (!isOwner && !presaleStarted) {
+        return (
+          <button onClick={notStarted} className={styles.button}>
+            Wait for the presale to open
+          </button>
+        );
+      }
+
+      // if connected user is the owner, and presale hasn't started yet, allow them to start a presale
+      if (isOwner && !presaleStarted) {
+        return (
+          <button onClick={startPresale} className={styles.button}>
+            Start presale
+          </button>
+        );
+      }
+
+      // if presale has started, but not ended, allow for minting during the presale period
+      if (presaleStarted && !presaleEnded) {
+        return (
+          <div>
+            <div className={styles.description}>
+              Presale has started!!! If your address is whitelisted, Mint a
+              Halftone-ETH 🚀 Whitelist yourself first
+              <a
+                href="https://halftone-ethereum-whitelist.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ textDecoration: 'none' }}
+              >
+                <span className={styles.linkText}> here</span>
+              </a>
+            </div>
+            <button onClick={presaleMint} className={styles.button}>
+              Presale Mint 🪙
+            </button>
+          </div>
+        );
+      }
+
+      // if presale started and has ended, public minting can start
+      if (presaleStarted && presaleEnded) {
+        return (
+          <div>
+            <div className={styles.description}>
+              Presale has ended, but you still can do public minting!
+            </div>
+            <button onClick={publicMint} className={styles.button}>
+              Public Mint 🪙
+            </button>
+          </div>
+        );
+      }
+    } else if (!walletConnected) {
       return (
         <button onClick={connectWallet} className={styles.button}>
           Connect your wallet
         </button>
-      );
-    }
-
-    // if we are currently waiting for something, return a loading button
-    if (loading) return <button className={styles.button}>Loading...</button>;
-
-    // if connected user is NOT the owner, and presale hasn't started yet, display a presale status
-    if (!isOwner && !presaleStarted) {
-      return (
-        <button onClick={notStarted} className={styles.button}>
-          Wait for the presale to open
-        </button>
-      );
-    }
-
-    // if connected user is the owner, and presale hasn't started yet, allow them to start a presale
-    if (isOwner && !presaleStarted) {
-      return (
-        <button onClick={startPresale} className={styles.button}>
-          Start presale
-        </button>
-      );
-    }
-
-    // if presale has started, but not ended, allow for minting during the presale period
-    if (presaleStarted && !presaleEnded) {
-      return (
-        <div>
-          <div className={styles.description}>
-            Presale has started!!! If your address is whitelisted, Mint a
-            Halftone-ETH 🚀 Whitelist yourself first
-            <a
-              href="https://halftone-ethereum-whitelist.vercel.app/"
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ textDecoration: 'none' }}
-            >
-              <span className={styles.linkText}> here</span>
-            </a>
-          </div>
-          <button onClick={presaleMint} className={styles.button}>
-            Presale Mint 🪙
-          </button>
-        </div>
-      );
-    }
-
-    // if presale started and has ended, public minting can start
-    if (presaleStarted && presaleEnded) {
-      console.log('presaleEnded', presaleEnded);
-      console.log('presaleEndedTimestamp', presaleEndedTimestamp);
-      return (
-        <div>
-          <div className={styles.description}>
-            Presale has ended, but you still can do public minting!
-          </div>
-          <button onClick={publicMint} className={styles.button}>
-            Public Mint 🪙
-          </button>
-        </div>
       );
     }
   };
