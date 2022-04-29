@@ -41,7 +41,7 @@ export default function Home() {
   // const mockTimestamp = NOW_IN_MS + customTime;
   // const mockTimestamp = NOW_IN_MS + THREE_DAYS_IN_MS;
 
-  const TWITTER_HANDLE = 'p0tat0H8';
+  const TWITTER_HANDLE = 'async_dime';
   const TWITTER_LINK = `https://twitter.com/${TWITTER_HANDLE}`;
 
   let toastProperties = null;
